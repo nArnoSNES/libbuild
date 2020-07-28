@@ -1,0 +1,63 @@
+#---------------------------------------------------------------------------------
+# path to tools
+#---------------------------------------------------------------------------------
+LIBDIRSOBJS = ./lib
+LIBOBJS :=	$(LIBDIRSOBJS)/crt0_snes.obj $(LIBDIRSOBJS)/libc.obj $(LIBDIRSOBJS)/libm.obj $(LIBDIRSOBJS)/libtcc.obj
+
+#---------------------------------------------------------------------------------
+# the compiler executables
+#---------------------------------------------------------------------------------
+
+export CC	:=	816-tcc
+export AS	:=	wla-65816
+export LD	:=	wlalink
+export PY	:=	816-opt.py
+export BS	:=	bass
+export OM	:=	optimore-816
+export CTF	:=	constify
+export GFXCONV	:=	gfx2snes
+export SNTOOLS	:=	snestools
+export SMCONV	:=	smconv
+export BRCONV	:=	snesbrr
+export TXCONV	:=	bin2txt
+
+#---------------------------------------------------------------------------------
+# Add default flag for compiling
+#---------------------------------------------------------------------------------
+CFLAGS += -I./include 
+
+#---------------------------------------------------------------------------------
+%.ps: %.c
+	@echo Compiling to .ps ... $(notdir $<)
+	$(CC) $(CFLAGS) -Wall -c $< -o $@
+
+#---------------------------------------------------------------------------------
+%.obj: %.asm
+	@echo Doing obj files ... $(fname)
+#	@cp $< $<.savasm 
+	$(AS) -io $< $@  
+
+#---------------------------------------------------------------------------------
+%.asm: %.ps
+	@echo Assembling ... $(notdir $<)
+	$(PY) $< >$*.asp 
+	@echo Moving constants ... $(notdir $<)
+	$(CTF) $*.c $*.asp $@
+	@rm $*.asp
+
+#---------------------------------------------------------------------------------
+%.sfc:
+	@echo Linking ... $(notdir $@)
+	$(LD) -dsno $(OFILES) $(LIBOBJS) $@
+	@sed 's/://' <$(TARGET).sym >$(TARGET).tmp
+	@mv $(TARGET).tmp $(TARGET).sym
+
+#---------------------------------------------------------------------------------
+%.pic: %.bmp
+	@echo convert bitmap ... $(notdir $<)
+	$(GFXCONV) -pr -pc16 -n -gs8 -pe0 -fbmp -m $<
+
+#---------------------------------------------------------------------------------
+%.brr: %.wav
+	@echo convert wav file ... $(notdir $<)
+	$(BRCONV) -e $< $@

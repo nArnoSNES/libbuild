@@ -1,0 +1,15 @@
+gitlayers:
+- target: sneslib
+  layers:
+  - url: https://github.com/nArnoSNES/snes-sdk.git
+    subpath: libs
+  - url: https://github.com/alekmaul/pvsneslib.git
+    subpath: pvsneslib/source
+  - url: https://github.com/nArnoSNES/libbuild.git
+    subpath: libbuild
+- target: sneslib/include
+  layers:
+  - url: https://github.com/alekmaul/pvsneslib.git
+    subpath: devkitsnes/include
+  - url: https://github.com/alekmaul/pvsneslib.git
+    subpath: pvsneslib/include
